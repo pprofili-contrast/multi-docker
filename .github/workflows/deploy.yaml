@@ -8,10 +8,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
+    #  Check out the code
       - uses: actions/checkout@v2
-#      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-      - run: docker build -t pprofili/docker-react -f Dockerfile.dev .
-      - run: docker run -e CI=true pprofili/docker-react npm test
+    #  Build the docker images
+      - run: docker build -t pprofili/multi-client ./client
+      - run: docker build -t pprofili/multi-nginx ./nginx
+      - run: docker build -t pprofili/multi-server ./server
+      - run: docker build -t pprofili/multi-worker ./worker
+
+    #     Log into Docker Hub and push the images up there
+      - run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - run: docker push pprofili/multi-client
+      - run: docker push pprofili/multi-nginx
+      - run: docker push pprofili/multi-server
+      - run: docker push pprofili/multi-worker
+#      - run: docker run -e CI=true pprofili/docker-react npm test
  
       - name: Generate deployment package
         run: zip -r deploy.zip . -x '*.git*'
